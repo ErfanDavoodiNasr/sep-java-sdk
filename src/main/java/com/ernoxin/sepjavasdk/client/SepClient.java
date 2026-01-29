@@ -99,11 +99,13 @@ public final class SepClient {
         }
         String stateValue = findParam(params, "State");
         String statusValue = findParam(params, "Status");
-        SepCallbackStatus status = SepCallbackStatus.fromState(stateValue);
+        SepCallbackStatus statusFromState = SepCallbackStatus.fromState(stateValue);
         Integer statusCode = parseInteger(statusValue, "Status");
-        if (status == null && statusCode != null) {
-            status = SepCallbackStatus.fromCode(statusCode);
+        SepCallbackStatus statusFromCode = statusCode != null ? SepCallbackStatus.fromCode(statusCode) : null;
+        if (statusFromState != null && statusFromCode != null && statusFromState != statusFromCode) {
+            throw new SepCallbackException("State and Status mismatch: " + stateValue + " / " + statusValue);
         }
+        SepCallbackStatus status = statusFromState != null ? statusFromState : statusFromCode;
         if (status == null) {
             if (stateValue == null && statusValue == null) {
                 throw new SepCallbackException("State or Status is required");
@@ -113,7 +115,7 @@ public final class SepClient {
             }
             throw new SepCallbackException("Status is invalid: " + statusValue);
         }
-        return new SepCallback(
+        SepCallback callback = new SepCallback(
                 status,
                 statusCode,
                 findParam(params, "Token"),
@@ -129,6 +131,10 @@ public final class SepClient {
                 findParam(params, "SecurePan"),
                 findParam(params, "HashedCardNumber")
         );
+        if (callback.isOk() && (callback.refNum() == null || callback.refNum().isBlank())) {
+            throw new SepCallbackException("RefNum is required when payment is OK");
+        }
+        return callback;
     }
 
     public SepCallback parseCallback(MultiValueMap<String, String> params) {
