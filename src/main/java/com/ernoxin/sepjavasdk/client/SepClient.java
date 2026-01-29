@@ -45,6 +45,7 @@ public final class SepClient {
         validateTokenRequest(request);
         URI redirectUrl = request.redirectUrl() != null ? request.redirectUrl() : config.callbackUrl();
         String hashedCardNumber = normalizeHashedCardNumbers(request.hashedCardNumbers());
+        Integer tokenExpiryInMin = normalizeTokenExpiry(request.tokenExpiryInMin());
         TokenPayload payload = new TokenPayload(
                 TOKEN_ACTION,
                 config.terminalId(),
@@ -53,7 +54,7 @@ public final class SepClient {
                 request.resNum(),
                 redirectUrl,
                 request.cellNumber(),
-                request.tokenExpiryInMin(),
+                tokenExpiryInMin,
                 hashedCardNumber,
                 request.getMethod(),
                 request.resNum1(),
@@ -163,13 +164,6 @@ public final class SepClient {
             SepValidation.requireNonBlank(request.cellNumber(), "cellNumber");
         }
         SepValidation.requireNonNegative(request.wage(), "wage");
-        if (request.tokenExpiryInMin() != null) {
-            int value = request.tokenExpiryInMin();
-            if (value < config.minTokenExpiryInMin() || value > config.maxTokenExpiryInMin()) {
-                throw new SepValidationException("tokenExpiryInMin must be between " + config.minTokenExpiryInMin()
-                        + " and " + config.maxTokenExpiryInMin());
-            }
-        }
         validateOptionalResNum(request.resNum1(), "resNum1");
         validateOptionalResNum(request.resNum2(), "resNum2");
         validateOptionalResNum(request.resNum3(), "resNum3");
@@ -247,6 +241,21 @@ public final class SepClient {
             return null;
         }
         return String.join("|", normalized);
+    }
+
+    private Integer normalizeTokenExpiry(Integer tokenExpiryInMin) {
+        if (tokenExpiryInMin == null) {
+            return null;
+        }
+        int min = config.minTokenExpiryInMin();
+        int max = config.maxTokenExpiryInMin();
+        if (tokenExpiryInMin < min) {
+            return min;
+        }
+        if (tokenExpiryInMin > max) {
+            return max;
+        }
+        return tokenExpiryInMin;
     }
 
     private long parseTerminalNumber() {

@@ -25,7 +25,7 @@
 <pre><code class="language-xml">&lt;dependency&gt;
   &lt;groupId&gt;com.ernoxin&lt;/groupId&gt;
   &lt;artifactId&gt;sep-java-sdk&lt;/artifactId&gt;
-  &lt;version&gt;1.0.2&lt;/version&gt;
+  &lt;version&gt;1.0.3&lt;/version&gt;
 &lt;/dependency&gt;
 </code></pre>
 </div>
@@ -261,7 +261,7 @@ TokenResult result = client.requestToken(request);
       <td><code dir="ltr">tokenExpiryInMin</code></td>
       <td>Integer</td>
       <td>خیر</td>
-      <td>اعتبار توکن به دقیقه (بین ۲۰ تا ۳۶۰۰).</td>
+      <td>اعتبار توکن به دقیقه (بین ۲۰ تا ۳۶۰۰؛ مقادیر خارج از بازه به کمینه/بیشینه تبدیل می‌شود).</td>
     </tr>
     <tr>
       <td><code dir="ltr">hashedCardNumbers</code></td>
