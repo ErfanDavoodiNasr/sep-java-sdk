@@ -11,8 +11,10 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.http.client.JdkClientHttpRequestFactory;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.util.StreamUtils;
 import org.springframework.web.client.*;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -35,7 +37,7 @@ public final class SepHttpClient {
         this.restTemplate = restTemplate;
         this.mapper = mapper;
         this.responseParser = new SepResponseParser(mapper);
-        configureRestTemplate(restTemplate);
+        configureRestTemplate(restTemplate, config);
     }
 
     public static SepHttpClient create(SepConfig config) {
@@ -44,12 +46,18 @@ public final class SepHttpClient {
                 .connectTimeout(config.connectTimeout())
                 .build();
         JdkClientHttpRequestFactory requestFactory = new JdkClientHttpRequestFactory(httpClient);
-        requestFactory.setReadTimeout(config.readTimeout());
         RestTemplate restTemplate = new RestTemplate(requestFactory);
         return new SepHttpClient(config, restTemplate, mapper);
     }
 
-    private static void configureRestTemplate(RestTemplate restTemplate) {
+    private static void configureRestTemplate(RestTemplate restTemplate, SepConfig config) {
+        ClientHttpRequestFactory requestFactory = restTemplate.getRequestFactory();
+        if (requestFactory instanceof SimpleClientHttpRequestFactory simpleFactory) {
+            simpleFactory.setConnectTimeout((int) config.connectTimeout().toMillis());
+            simpleFactory.setReadTimeout((int) config.readTimeout().toMillis());
+        } else if (requestFactory instanceof JdkClientHttpRequestFactory jdkFactory) {
+            jdkFactory.setReadTimeout(config.readTimeout());
+        }
         if (restTemplate.getErrorHandler() instanceof DefaultResponseErrorHandler) {
             restTemplate.setErrorHandler(new ResponseErrorHandler() {
                 @Override

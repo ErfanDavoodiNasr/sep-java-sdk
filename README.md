@@ -25,7 +25,7 @@
 <pre><code class="language-xml">&lt;dependency&gt;
   &lt;groupId&gt;com.ernoxin&lt;/groupId&gt;
   &lt;artifactId&gt;sep-java-sdk&lt;/artifactId&gt;
-  &lt;version&gt;1.0.0&lt;/version&gt;
+  &lt;version&gt;1.0.1&lt;/version&gt;
 &lt;/dependency&gt;
 </code></pre>
 </div>
