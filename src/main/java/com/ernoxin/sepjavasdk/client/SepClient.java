@@ -19,6 +19,8 @@ import java.util.*;
 
 public final class SepClient {
     private static final String TOKEN_ACTION = "token";
+    private static final int MAX_REDIRECT_URL_LENGTH = 2083;
+    private static final int MAX_REDIRECT_URL_LENGTH_GET_METHOD = 1538;
 
     private final SepConfig config;
     private final SepHttpClient httpClient;
@@ -160,6 +162,10 @@ public final class SepClient {
             throw new SepValidationException("redirectUrl is required");
         }
         SepValidation.requireHttpUri(redirectUrl, "redirectUrl");
+        int maxRedirectLength = Boolean.TRUE.equals(request.getMethod())
+                ? MAX_REDIRECT_URL_LENGTH_GET_METHOD
+                : MAX_REDIRECT_URL_LENGTH;
+        SepValidation.requireMaxLength(redirectUrl.toString(), maxRedirectLength, "redirectUrl");
         if (request.cellNumber() != null) {
             SepValidation.requireNonBlank(request.cellNumber(), "cellNumber");
         }
