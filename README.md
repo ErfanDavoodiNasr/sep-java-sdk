@@ -192,6 +192,7 @@ TokenResult result = client.requestToken(request);
 
 <h3>گام ۴: بازگشت و وریفای تراکنش</h3>
 <p>فقط وقتی وضعیت تراکنش <span dir="ltr">OK</span> است باید وریفای انجام شود.</p>
+<p><strong>نکتهٔ امنیتی مهم:</strong> برای جلوگیری از <span dir="ltr">Spending Double</span> مقدار <span dir="ltr">RefNum</span> را در پایگاه‌داده ذخیره کنید و روی آن محدودیت یکتا (unique constraint) بگذارید؛ اگر <span dir="ltr">RefNum</span> قبلاً ثبت شده بود، پیش از وریفای پردازش را متوقف کنید و نتیجه را «تأیید شده/تکراری» اعلام نمایید.</p>
 <div dir="ltr" align="left">
 <pre><code class="language-java">public VerifyResult handleCallback(SepClient client, Map&lt;String, String&gt; params) {
     SepCallback callback = client.parseCallback(params);
