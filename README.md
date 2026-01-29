@@ -198,8 +198,17 @@ TokenResult result = client.requestToken(request);
     if (!callback.isOk()) {
         throw new IllegalStateException("پرداخت ناموفق یا لغو شده است");
     }
-    VerifyRequest request = new VerifyRequest(callback.refNum());
-    return client.verifyTransaction(request);
+
+    Order order = orderService.findByResNum(callback.resNum());
+    VerifyResult result = client.verifyTransaction(new VerifyRequest(callback.refNum()));
+
+    long verifiedAmount = result.transactionDetail().originalAmount();
+    // For discount terminals, compare AffectiveAmount instead of OriginalAmount
+    if (verifiedAmount != order.amount()) {
+        client.reverseTransaction(new ReverseRequest(callback.refNum()));
+        throw new IllegalStateException("مبلغ وریفای با مبلغ سفارش برابر نیست");
+    }
+    return result;
 }
 </code></pre>
 </div>
