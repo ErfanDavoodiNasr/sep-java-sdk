@@ -4,6 +4,9 @@ import lombok.experimental.UtilityClass;
 
 import java.util.Map;
 
+/**
+ * Catalog of known SEP gateway codes to human-readable messages.
+ */
 @UtilityClass
 public class SepErrorCatalog {
     private static final Map<Integer, String> TOKEN_MESSAGES = Map.ofEntries(
@@ -30,6 +33,12 @@ public class SepErrorCatalog {
             Map.entry(5, "Transaction is reversed")
     );
 
+    /**
+     * Resolves a token API code to catalog message.
+     *
+     * @param code SEP token response code
+     * @return catalog message, or {@code null} when unknown
+     */
     public static String messageForToken(Integer code) {
         if (code == null) {
             return null;
@@ -37,6 +46,12 @@ public class SepErrorCatalog {
         return TOKEN_MESSAGES.get(code);
     }
 
+    /**
+     * Resolves verify/reverse response code to catalog message.
+     *
+     * @param code SEP transaction response code
+     * @return catalog message, or {@code null} when unknown
+     */
     public static String messageForTransaction(Integer code) {
         if (code == null) {
             return null;

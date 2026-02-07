@@ -3,7 +3,9 @@ package com.ernoxin.sepjavasdk.client;
 import com.ernoxin.sepjavasdk.callback.SepCallback;
 import com.ernoxin.sepjavasdk.callback.SepCallbackStatus;
 import com.ernoxin.sepjavasdk.config.SepConfig;
+import com.ernoxin.sepjavasdk.exception.SepApiException;
 import com.ernoxin.sepjavasdk.exception.SepCallbackException;
+import com.ernoxin.sepjavasdk.exception.SepTransportException;
 import com.ernoxin.sepjavasdk.exception.SepValidationException;
 import com.ernoxin.sepjavasdk.http.SepHttpClient;
 import com.ernoxin.sepjavasdk.http.SepResponseType;
@@ -17,6 +19,40 @@ import org.springframework.web.util.UriComponentsBuilder;
 import java.net.URI;
 import java.util.*;
 
+/**
+ * Main SEP gateway client used to request tokens, verify transactions, reverse transactions and
+ * parse callback parameters.
+ *
+ * <p>Amounts in this SDK are sent as integer gateway amounts. SEP terminals commonly expect IRR.
+ * If your business domain stores amounts in IRT (toman), convert to the unit expected by your
+ * terminal before calling this client.
+ *
+ * <p>Network behavior is delegated to {@link SepHttpClient}: connect/read timeouts come from
+ * {@link SepConfig}, and retries (when enabled) are applied only to transport errors, not to SEP
+ * business response codes.
+ *
+ * <p>Thread-safety: this class is thread-safe for concurrent use after construction. It keeps
+ * immutable references and does not mutate request-scoped state.
+ *
+ * <p>Example: requesting a token and building a redirect URL.
+ *
+ * <pre>{@code
+ * TokenRequest request = TokenRequest.builder(12000, "ORDER-1001")
+ *         .cellNumber("09120000000")
+ *         .build();
+ * TokenResult tokenResult = sepClient.requestToken(request);
+ * String redirectUrl = sepClient.buildRedirectUrl(tokenResult.token());
+ * }</pre>
+ *
+ * <p>Example: callback parsing and verification.
+ *
+ * <pre>{@code
+ * SepCallback callback = sepClient.parseCallback(callbackParams);
+ * if (callback.isOk()) {
+ *     VerifyResult verifyResult = sepClient.verifyTransaction(new VerifyRequest(callback.refNum()));
+ * }
+ * }</pre>
+ */
 public final class SepClient {
     private static final String TOKEN_ACTION = "token";
     private static final int MAX_REDIRECT_URL_LENGTH = 2083;
@@ -25,10 +61,23 @@ public final class SepClient {
     private final SepConfig config;
     private final SepHttpClient httpClient;
 
+    /**
+     * Creates a client using a default HTTP client built from the provided configuration.
+     *
+     * @param config validated SDK configuration
+     * @throws SepValidationException when {@code config} is {@code null}
+     */
     public SepClient(SepConfig config) {
         this(config, SepHttpClient.create(config));
     }
 
+    /**
+     * Creates a client with explicit configuration and HTTP transport implementation.
+     *
+     * @param config validated SDK configuration
+     * @param httpClient HTTP transport abstraction used for SEP calls
+     * @throws SepValidationException when any required argument is {@code null}
+     */
     public SepClient(SepConfig config, SepHttpClient httpClient) {
         if (config == null) {
             throw new SepValidationException("config is required");
@@ -40,6 +89,18 @@ public final class SepClient {
         this.httpClient = httpClient;
     }
 
+    /**
+     * Requests a payment token from SEP.
+     *
+     * <p>If {@link TokenRequest#redirectUrl()} is not provided, {@link SepConfig#callbackUrl()} is
+     * used. Optional token expiry is clamped into configured min/max limits.
+     *
+     * @param request token request payload
+     * @return successful token response
+     * @throws SepValidationException when the request is {@code null} or validation fails
+     * @throws SepTransportException when network communication with SEP fails
+     * @throws SepApiException when SEP returns an unsuccessful or malformed response
+     */
     public TokenResult requestToken(TokenRequest request) {
         if (request == null) {
             throw new SepValidationException("token request is required");
@@ -69,6 +130,15 @@ public final class SepClient {
         return httpClient.post(SepEndpoints.token(), payload, TokenResult.class, SepResponseType.TOKEN, Set.of(1));
     }
 
+    /**
+     * Verifies a transaction by its SEP {@code refNum}.
+     *
+     * @param request verification request containing {@code refNum}
+     * @return verification result payload
+     * @throws SepValidationException when the request or {@code refNum} is invalid
+     * @throws SepTransportException when network communication with SEP fails
+     * @throws SepApiException when SEP returns an unsuccessful or malformed response
+     */
     public VerifyResult verifyTransaction(VerifyRequest request) {
         if (request == null) {
             throw new SepValidationException("verify request is required");
@@ -78,6 +148,15 @@ public final class SepClient {
         return httpClient.post(SepEndpoints.verify(), payload, VerifyResult.class, SepResponseType.TRANSACTION, Set.of(0));
     }
 
+    /**
+     * Reverses a transaction by its SEP {@code refNum}.
+     *
+     * @param request reverse request containing {@code refNum}
+     * @return reverse result payload
+     * @throws SepValidationException when the request or {@code refNum} is invalid
+     * @throws SepTransportException when network communication with SEP fails
+     * @throws SepApiException when SEP returns an unsuccessful or malformed response
+     */
     public ReverseResult reverseTransaction(ReverseRequest request) {
         if (request == null) {
             throw new SepValidationException("reverse request is required");
@@ -87,6 +166,16 @@ public final class SepClient {
         return httpClient.post(SepEndpoints.reverse(), payload, ReverseResult.class, SepResponseType.TRANSACTION, Set.of(0));
     }
 
+    /**
+     * Builds the gateway redirect URL for a previously issued token.
+     *
+     * <p>The returned URL targets SEP {@code /OnlinePG/SendToken} endpoint under configured
+     * {@link SepConfig#baseUrl()}.
+     *
+     * @param token non-blank token value from {@link #requestToken(TokenRequest)}
+     * @return full redirect URL to send the customer to SEP
+     * @throws SepValidationException when {@code token} is blank
+     */
     public String buildRedirectUrl(String token) {
         SepValidation.requireNonBlank(token, "token");
         return UriComponentsBuilder.fromUri(config.baseUrl())
@@ -96,6 +185,18 @@ public final class SepClient {
                 .toUriString();
     }
 
+    /**
+     * Parses callback parameters from a flat map.
+     *
+     * <p>Parameter names are matched case-insensitively. When both {@code State} and
+     * {@code Status} are present they must map to the same semantic status, otherwise parsing
+     * fails.
+     *
+     * @param params callback parameters, typically obtained from query/form data
+     * @return parsed callback object
+     * @throws SepCallbackException when callback payload is missing required fields or contains
+     * invalid values
+     */
     public SepCallback parseCallback(Map<String, String> params) {
         if (params == null) {
             throw new SepCallbackException("params is required");
@@ -140,6 +241,16 @@ public final class SepClient {
         return callback;
     }
 
+    /**
+     * Parses callback parameters from a multi-value map (for example Spring MVC form/query maps).
+     *
+     * <p>For keys with multiple values, only the first value is considered.
+     *
+     * @param params callback parameter map
+     * @return parsed callback object
+     * @throws SepCallbackException when callback payload is missing required fields or contains
+     * invalid values
+     */
     public SepCallback parseCallback(MultiValueMap<String, String> params) {
         if (params == null) {
             throw new SepCallbackException("params is required");
@@ -253,6 +364,7 @@ public final class SepClient {
         if (tokenExpiryInMin == null) {
             return null;
         }
+        // SEP accepts a bounded range; keep client behavior deterministic by clamping.
         int min = config.minTokenExpiryInMin();
         int max = config.maxTokenExpiryInMin();
         if (tokenExpiryInMin < min) {

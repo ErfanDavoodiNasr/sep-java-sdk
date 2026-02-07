@@ -26,12 +26,34 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * Low-level HTTP client for SEP API communication.
+ *
+ * <p>This type serializes requests, sends POST calls through Spring {@link RestTemplate}, and
+ * delegates response validation/parsing to {@link SepResponseParser}.
+ *
+ * <p>Timeout and retry behavior:
+ * <ul>
+ * <li>Connect/read timeouts are read from {@link SepConfig}.</li>
+ * <li>Retries are attempted only for {@link RestClientException} transport failures.</li>
+ * <li>SEP business errors are not retried.</li>
+ * </ul>
+ *
+ * <p>Thread-safety: this class is thread-safe for concurrent use after construction.
+ */
 public final class SepHttpClient {
     private final SepConfig config;
     private final RestTemplate restTemplate;
     private final ObjectMapper mapper;
     private final SepResponseParser responseParser;
 
+    /**
+     * Creates a client with explicit transport and mapper dependencies.
+     *
+     * @param config SDK configuration
+     * @param restTemplate REST template instance used for calls
+     * @param mapper object mapper for request/response JSON
+     */
     public SepHttpClient(SepConfig config, RestTemplate restTemplate, ObjectMapper mapper) {
         this.config = config;
         this.restTemplate = restTemplate;
@@ -40,6 +62,12 @@ public final class SepHttpClient {
         configureRestTemplate(restTemplate, config);
     }
 
+    /**
+     * Creates a default HTTP client using JDK {@link HttpClient} backend and SDK JSON mapper.
+     *
+     * @param config SDK configuration
+     * @return configured HTTP client
+     */
     public static SepHttpClient create(SepConfig config) {
         ObjectMapper mapper = SepObjectMapper.create();
         HttpClient httpClient = HttpClient.newBuilder()
@@ -59,6 +87,7 @@ public final class SepHttpClient {
             jdkFactory.setReadTimeout(config.readTimeout());
         }
         if (restTemplate.getErrorHandler() instanceof DefaultResponseErrorHandler) {
+            // SEP may return business failure payloads with non-2xx statuses; let parser inspect body.
             restTemplate.setErrorHandler(new ResponseErrorHandler() {
                 @Override
                 public boolean hasError(@NonNull ClientHttpResponse response) {
@@ -72,6 +101,19 @@ public final class SepHttpClient {
         }
     }
 
+    /**
+     * Sends a JSON POST request to SEP and parses a typed response.
+     *
+     * @param path SEP endpoint path appended to configured base URL
+     * @param request request payload object
+     * @param dataType expected response data type
+     * @param responseType response validation strategy
+     * @param successCodes logical gateway success codes for selected response type
+     * @param <T> result type
+     * @return parsed successful response payload
+     * @throws SepValidationException when request serialization fails
+     * @throws SepTransportException when transport fails after retries
+     */
     public <T> T post(String path, Object request, Class<T> dataType, SepResponseType responseType, Set<Integer> successCodes) {
         URI baseUrl = config.baseUrl();
         URI url = UriComponentsBuilder.fromUri(baseUrl).path(path).build().toUri();

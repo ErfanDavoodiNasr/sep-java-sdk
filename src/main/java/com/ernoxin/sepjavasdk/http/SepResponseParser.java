@@ -9,13 +9,35 @@ import org.springframework.http.ResponseEntity;
 
 import java.util.Set;
 
+/**
+ * Parses and validates SEP HTTP responses against expected gateway contracts.
+ *
+ * <p>Validation behavior depends on {@link SepResponseType}. Failures are reported as
+ * {@link SepApiException} with HTTP and gateway-level context.
+ */
 public final class SepResponseParser {
     private final ObjectMapper mapper;
 
+    /**
+     * Creates a parser backed by provided JSON mapper.
+     *
+     * @param mapper object mapper for response decoding
+     */
     public SepResponseParser(ObjectMapper mapper) {
         this.mapper = mapper;
     }
 
+    /**
+     * Validates and converts an HTTP response body to target type.
+     *
+     * @param response raw HTTP response
+     * @param responseType expected gateway response shape
+     * @param successCodes gateway result codes considered successful
+     * @param dataType target model type
+     * @param <T> parsed model type
+     * @return parsed response model
+     * @throws SepApiException when response is empty, malformed, or unsuccessful
+     */
     public <T> T parse(ResponseEntity<String> response, SepResponseType responseType, Set<Integer> successCodes, Class<T> dataType) {
         int httpStatus = response.getStatusCode().value();
         String body = response.getBody();
