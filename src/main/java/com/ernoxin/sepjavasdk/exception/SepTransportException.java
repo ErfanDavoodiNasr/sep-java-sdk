@@ -11,7 +11,7 @@ public class SepTransportException extends SepException {
      * Creates a transport exception.
      *
      * @param message transport failure summary
-     * @param cause root cause
+     * @param cause   root cause
      */
     public SepTransportException(String message, Throwable cause) {
         super(message, cause);

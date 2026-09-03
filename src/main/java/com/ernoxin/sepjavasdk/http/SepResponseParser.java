@@ -30,11 +30,11 @@ public final class SepResponseParser {
     /**
      * Validates and converts an HTTP response body to target type.
      *
-     * @param response raw HTTP response
+     * @param response     raw HTTP response
      * @param responseType expected gateway response shape
      * @param successCodes gateway result codes considered successful
-     * @param dataType target model type
-     * @param <T> parsed model type
+     * @param dataType     target model type
+     * @param <T>          parsed model type
      * @return parsed response model
      * @throws SepApiException when response is empty, malformed, or unsuccessful
      */

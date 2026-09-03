@@ -74,7 +74,7 @@ public final class SepClient {
     /**
      * Creates a client with explicit configuration and HTTP transport implementation.
      *
-     * @param config validated SDK configuration
+     * @param config     validated SDK configuration
      * @param httpClient HTTP transport abstraction used for SEP calls
      * @throws SepValidationException when any required argument is {@code null}
      */
@@ -93,13 +93,13 @@ public final class SepClient {
      * Requests a payment token from SEP.
      *
      * <p>If {@link TokenRequest#redirectUrl()} is not provided, {@link SepConfig#callbackUrl()} is
-     * used. Optional token expiry is clamped into configured min/max limits.
+     * used. Optional token expiry must be within configured min/max limits (no silent clamping).
      *
      * @param request token request payload
      * @return successful token response
      * @throws SepValidationException when the request is {@code null} or validation fails
-     * @throws SepTransportException when network communication with SEP fails
-     * @throws SepApiException when SEP returns an unsuccessful or malformed response
+     * @throws SepTransportException  when network communication with SEP fails
+     * @throws SepApiException        when SEP returns an unsuccessful or malformed response
      */
     public TokenResult requestToken(TokenRequest request) {
         if (request == null) {
@@ -136,8 +136,8 @@ public final class SepClient {
      * @param request verification request containing {@code refNum}
      * @return verification result payload
      * @throws SepValidationException when the request or {@code refNum} is invalid
-     * @throws SepTransportException when network communication with SEP fails
-     * @throws SepApiException when SEP returns an unsuccessful or malformed response
+     * @throws SepTransportException  when network communication with SEP fails
+     * @throws SepApiException        when SEP returns an unsuccessful or malformed response
      */
     public VerifyResult verifyTransaction(VerifyRequest request) {
         if (request == null) {
@@ -154,8 +154,8 @@ public final class SepClient {
      * @param request reverse request containing {@code refNum}
      * @return reverse result payload
      * @throws SepValidationException when the request or {@code refNum} is invalid
-     * @throws SepTransportException when network communication with SEP fails
-     * @throws SepApiException when SEP returns an unsuccessful or malformed response
+     * @throws SepTransportException  when network communication with SEP fails
+     * @throws SepApiException        when SEP returns an unsuccessful or malformed response
      */
     public ReverseResult reverseTransaction(ReverseRequest request) {
         if (request == null) {
@@ -188,6 +188,11 @@ public final class SepClient {
     /**
      * Parses callback parameters from a flat map.
      *
+     * <p><strong>Security:</strong> this only parses gateway return parameters. It does
+     * <em>not</em> prove payment success. Always call {@link #verifyTransaction(VerifyRequest)}
+     * when {@link SepCallback#isOk()} is true, and reconcile {@code resNum}/amount with your
+     * own order store before fulfilling.
+     *
      * <p>Parameter names are matched case-insensitively. When both {@code State} and
      * {@code Status} are present they must map to the same semantic status, otherwise parsing
      * fails.
@@ -195,7 +200,7 @@ public final class SepClient {
      * @param params callback parameters, typically obtained from query/form data
      * @return parsed callback object
      * @throws SepCallbackException when callback payload is missing required fields or contains
-     * invalid values
+     *                              invalid values
      */
     public SepCallback parseCallback(Map<String, String> params) {
         if (params == null) {
@@ -249,7 +254,7 @@ public final class SepClient {
      * @param params callback parameter map
      * @return parsed callback object
      * @throws SepCallbackException when callback payload is missing required fields or contains
-     * invalid values
+     *                              invalid values
      */
     public SepCallback parseCallback(MultiValueMap<String, String> params) {
         if (params == null) {
@@ -364,14 +369,12 @@ public final class SepClient {
         if (tokenExpiryInMin == null) {
             return null;
         }
-        // SEP accepts a bounded range; keep client behavior deterministic by clamping.
         int min = config.minTokenExpiryInMin();
         int max = config.maxTokenExpiryInMin();
-        if (tokenExpiryInMin < min) {
-            return min;
-        }
-        if (tokenExpiryInMin > max) {
-            return max;
+        if (tokenExpiryInMin < min || tokenExpiryInMin > max) {
+            throw new SepValidationException(
+                    "tokenExpiryInMin must be between " + min + " and " + max + " (inclusive)"
+            );
         }
         return tokenExpiryInMin;
     }

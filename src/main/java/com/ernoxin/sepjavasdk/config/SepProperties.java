@@ -17,6 +17,11 @@ import java.time.Duration;
 @ConfigurationProperties(prefix = "sep")
 public class SepProperties {
     /**
+     * Must be {@code true} to register SDK beans via auto-configuration.
+     * Defaults to {@code false} so the dependency alone does not start beans.
+     */
+    private boolean enabled = false;
+    /**
      * Merchant terminal identifier (numeric).
      */
     private String terminalId;

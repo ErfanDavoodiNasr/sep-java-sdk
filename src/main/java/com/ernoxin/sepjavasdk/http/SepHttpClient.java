@@ -42,6 +42,15 @@ import java.util.Set;
  * <p>Thread-safety: this class is thread-safe for concurrent use after construction.
  */
 public final class SepHttpClient {
+    private static final ResponseExtractor<ResponseEntity<String>> responseExtractor = response -> {
+        String responseBody = null;
+        try (InputStream stream = response.getBody()) {
+            if (stream != null) {
+                responseBody = StreamUtils.copyToString(stream, StandardCharsets.UTF_8);
+            }
+        }
+        return new ResponseEntity<>(responseBody, response.getHeaders(), response.getStatusCode());
+    };
     private final SepConfig config;
     private final RestTemplate restTemplate;
     private final ObjectMapper mapper;
@@ -50,9 +59,9 @@ public final class SepHttpClient {
     /**
      * Creates a client with explicit transport and mapper dependencies.
      *
-     * @param config SDK configuration
+     * @param config       SDK configuration
      * @param restTemplate REST template instance used for calls
-     * @param mapper object mapper for request/response JSON
+     * @param mapper       object mapper for request/response JSON
      */
     public SepHttpClient(SepConfig config, RestTemplate restTemplate, ObjectMapper mapper) {
         this.config = config;
@@ -78,6 +87,20 @@ public final class SepHttpClient {
         return new SepHttpClient(config, restTemplate, mapper);
     }
 
+    /**
+     * Sends a JSON POST request to SEP and parses a typed response.
+     *
+     * @param path SEP endpoint path appended to configured base URL
+     * @param request request payload object
+     * @param dataType expected response data type
+     * @param responseType response validation strategy
+     * @param successCodes logical gateway success codes for selected response type
+     * @param <T> result type
+     * @return parsed successful response payload
+     * @throws SepValidationException when request serialization fails
+     * @throws SepTransportException when transport fails after retries
+     */
+
     private static void configureRestTemplate(RestTemplate restTemplate, SepConfig config) {
         ClientHttpRequestFactory requestFactory = restTemplate.getRequestFactory();
         if (requestFactory instanceof SimpleClientHttpRequestFactory simpleFactory) {
@@ -102,19 +125,37 @@ public final class SepHttpClient {
     }
 
     /**
-     * Sends a JSON POST request to SEP and parses a typed response.
+     * Sends a mutating JSON POST that is never retried (token/verify/reverse).
      *
-     * @param path SEP endpoint path appended to configured base URL
-     * @param request request payload object
-     * @param dataType expected response data type
-     * @param responseType response validation strategy
-     * @param successCodes logical gateway success codes for selected response type
-     * @param <T> result type
-     * @return parsed successful response payload
-     * @throws SepValidationException when request serialization fails
-     * @throws SepTransportException when transport fails after retries
+     * @see #post(String, Object, Class, SepResponseType, Set, boolean)
      */
     public <T> T post(String path, Object request, Class<T> dataType, SepResponseType responseType, Set<Integer> successCodes) {
+        return post(path, request, dataType, responseType, successCodes, false);
+    }
+
+    /**
+     * Sends a JSON POST request to SEP and parses a typed response.
+     *
+     * <p>Retries apply only when {@code retryable} is {@code true} and retry is enabled in config.
+     * Token, verify, and reverse must keep {@code retryable=false}.
+     *
+     * @param path         SEP endpoint path appended to configured base URL
+     * @param request      request payload object
+     * @param dataType     expected response data type
+     * @param responseType response validation strategy
+     * @param successCodes logical gateway success codes for selected response type
+     * @param retryable    whether transport retries are allowed for this call
+     * @param <T>          result type
+     * @return parsed successful response payload
+     */
+    public <T> T post(
+            String path,
+            Object request,
+            Class<T> dataType,
+            SepResponseType responseType,
+            Set<Integer> successCodes,
+            boolean retryable
+    ) {
         URI baseUrl = config.baseUrl();
         URI url = UriComponentsBuilder.fromUri(baseUrl).path(path).build().toUri();
         String body = writeBody(request);
@@ -122,8 +163,8 @@ public final class SepHttpClient {
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.setAccept(List.of(MediaType.APPLICATION_JSON));
         headers.set(HttpHeaders.USER_AGENT, config.userAgent());
-        int attempts = config.retryEnabled() ? config.retryMaxAttempts() : 1;
-        long backoffMillis = config.retryEnabled() ? config.retryBackoff().toMillis() : 0;
+        int attempts = (retryable && config.retryEnabled()) ? config.retryMaxAttempts() : 1;
+        long backoffMillis = (retryable && config.retryEnabled()) ? config.retryBackoff().toMillis() : 0;
         RestClientException last = null;
         for (int attempt = 1; attempt <= attempts; attempt++) {
             ResponseEntity<String> response;
@@ -164,14 +205,4 @@ public final class SepHttpClient {
             throw new SepValidationException("Request body is invalid", ex);
         }
     }
-
-    private static final ResponseExtractor<ResponseEntity<String>> responseExtractor = response -> {
-        String responseBody = null;
-        try (InputStream stream = response.getBody()) {
-            if (stream != null) {
-                responseBody = StreamUtils.copyToString(stream, StandardCharsets.UTF_8);
-            }
-        }
-        return new ResponseEntity<>(responseBody, response.getHeaders(), response.getStatusCode());
-    };
 }

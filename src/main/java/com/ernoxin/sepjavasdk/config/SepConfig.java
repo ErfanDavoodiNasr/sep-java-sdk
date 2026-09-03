@@ -12,20 +12,21 @@ import java.time.Duration;
  * <p>Instances are validated eagerly (fail-fast). Any invalid value causes a
  * {@link SepValidationException} during construction.
  *
- * @param terminalId merchant terminal identifier; must be numeric and non-blank
- * @param callbackUrl default callback URL used when request-specific redirect URL is absent
- * @param connectTimeout network connect timeout for SEP HTTP calls; positive duration
- * @param readTimeout network read timeout for SEP HTTP calls; positive duration
- * @param baseUrl SEP base URL; normalized without trailing slash
- * @param retryEnabled enables retry on transport errors
- * @param retryMaxAttempts total retry attempts when retry is enabled; minimum {@code 1}
- * @param retryBackoff delay between retry attempts; non-negative
- * @param userAgent HTTP {@code User-Agent} header value
+ * @param terminalId          merchant terminal identifier; must be numeric and non-blank
+ * @param callbackUrl         default callback URL used when request-specific redirect URL is absent
+ * @param connectTimeout      network connect timeout for SEP HTTP calls; positive duration
+ * @param readTimeout         network read timeout for SEP HTTP calls; positive duration
+ * @param baseUrl             SEP base URL; normalized without trailing slash
+ * @param retryEnabled        enables retry on transport errors for safe/read-style calls only;
+ *                            token/verify/reverse never retry
+ * @param retryMaxAttempts    total retry attempts when retry is enabled; minimum {@code 1}
+ * @param retryBackoff        delay between retry attempts; non-negative
+ * @param userAgent           HTTP {@code User-Agent} header value
  * @param minTokenExpiryInMin lower bound for token expiry normalization
  * @param maxTokenExpiryInMin upper bound for token expiry normalization
- * @param maxSettlementItems maximum allowed number of settlement items in token requests
- * @param maxHashedCardCount maximum allowed number of hashed card numbers in token requests
- * @param maxResNumLength maximum allowed length for {@code resNum} and related fields
+ * @param maxSettlementItems  maximum allowed number of settlement items in token requests
+ * @param maxHashedCardCount  maximum allowed number of hashed card numbers in token requests
+ * @param maxResNumLength     maximum allowed length for {@code resNum} and related fields
  */
 public record SepConfig(
         String terminalId,

@@ -45,7 +45,7 @@ public class SepValidation {
      * Ensures a numeric value is greater than or equal to minimum.
      *
      * @param value value to validate
-     * @param min inclusive minimum
+     * @param min   inclusive minimum
      * @param field logical field name for error messages
      * @throws SepValidationException when validation fails
      */
@@ -75,7 +75,7 @@ public class SepValidation {
      * Ensures optional string length does not exceed maximum.
      *
      * @param value value to validate; ignored when {@code null}
-     * @param max maximum allowed length
+     * @param max   maximum allowed length
      * @param field logical field name for error messages
      * @throws SepValidationException when validation fails
      */
@@ -88,7 +88,7 @@ public class SepValidation {
     /**
      * Ensures URI is absolute HTTP/HTTPS.
      *
-     * @param uri URI to validate
+     * @param uri   URI to validate
      * @param field logical field name for error messages
      * @throws SepValidationException when validation fails
      */

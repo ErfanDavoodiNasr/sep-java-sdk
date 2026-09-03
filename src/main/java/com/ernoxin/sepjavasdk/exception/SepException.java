@@ -17,7 +17,7 @@ public class SepException extends RuntimeException {
      * Creates a new exception with message and cause.
      *
      * @param message failure message
-     * @param cause root cause
+     * @param cause   root cause
      */
     public SepException(String message, Throwable cause) {
         super(message, cause);

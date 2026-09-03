@@ -9,20 +9,20 @@ import java.util.List;
  * <p>Amounts are sent as integer gateway units (typically IRR for SEP terminals). Convert from IRT
  * if your domain stores toman values.
  *
- * @param amount transaction amount; must be positive
- * @param resNum merchant unique order/reference id; non-blank and limited by configuration
- * @param redirectUrl optional callback URL override; when {@code null}, SDK uses configured
- * callback URL
- * @param cellNumber optional customer mobile number
- * @param wage optional wage amount; when provided must be non-negative
- * @param tokenExpiryInMin optional token expiry in minutes; normalized to configured min/max range
- * @param hashedCardNumbers optional hashed card constraints; if provided must be non-empty
- * @param getMethod optional callback method hint; {@code true} means callback via GET
- * @param resNum1 optional additional reference field
- * @param resNum2 optional additional reference field
- * @param resNum3 optional additional reference field
- * @param resNum4 optional additional reference field
- * @param tranType optional transaction type
+ * @param amount             transaction amount; must be positive
+ * @param resNum             merchant unique order/reference id; non-blank and limited by configuration
+ * @param redirectUrl        optional callback URL override; when {@code null}, SDK uses configured
+ *                           callback URL
+ * @param cellNumber         optional customer mobile number
+ * @param wage               optional wage amount; when provided must be non-negative
+ * @param tokenExpiryInMin   optional token expiry in minutes; normalized to configured min/max range
+ * @param hashedCardNumbers  optional hashed card constraints; if provided must be non-empty
+ * @param getMethod          optional callback method hint; {@code true} means callback via GET
+ * @param resNum1            optional additional reference field
+ * @param resNum2            optional additional reference field
+ * @param resNum3            optional additional reference field
+ * @param resNum4            optional additional reference field
+ * @param tranType           optional transaction type
  * @param settlementIbanInfo optional settlement items; required for government transactions
  */
 public record TokenRequest(

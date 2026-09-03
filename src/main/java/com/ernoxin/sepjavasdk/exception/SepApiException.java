@@ -30,10 +30,10 @@ public class SepApiException extends SepException {
     /**
      * Creates an API exception without root cause.
      *
-     * @param httpStatus HTTP status code
-     * @param gatewayCode SEP gateway code, may be {@code null}
+     * @param httpStatus     HTTP status code
+     * @param gatewayCode    SEP gateway code, may be {@code null}
      * @param gatewayMessage gateway message, may be {@code null}
-     * @param rawBody raw HTTP response body, may be {@code null}
+     * @param rawBody        raw HTTP response body, may be {@code null}
      */
     public SepApiException(int httpStatus, Integer gatewayCode, String gatewayMessage, String rawBody) {
         super(buildMessage(httpStatus, gatewayCode, gatewayMessage));
@@ -46,11 +46,11 @@ public class SepApiException extends SepException {
     /**
      * Creates an API exception with root cause.
      *
-     * @param httpStatus HTTP status code
-     * @param gatewayCode SEP gateway code, may be {@code null}
+     * @param httpStatus     HTTP status code
+     * @param gatewayCode    SEP gateway code, may be {@code null}
      * @param gatewayMessage gateway message, may be {@code null}
-     * @param rawBody raw HTTP response body, may be {@code null}
-     * @param cause root cause
+     * @param rawBody        raw HTTP response body, may be {@code null}
+     * @param cause          root cause
      */
     public SepApiException(int httpStatus, Integer gatewayCode, String gatewayMessage, String rawBody, Throwable cause) {
         super(buildMessage(httpStatus, gatewayCode, gatewayMessage), cause);

@@ -4,7 +4,9 @@
 
 ## معرفی
 
-این کتابخانه یک <span dir="ltr">SDK</span> سبک برای اتصال به درگاه پرداخت اینترنتی سپ در پروژه‌های <span dir="ltr">Spring Boot 3.5.7</span> است. هدف آن ساده‌سازی دریافت توکن، اعتبارسنجی زودهنگام (<span dir="ltr">fail-fast</span>) و دریافت پاسخ‌های تایپ‌شده است.
+این کتابخانه یک <span dir="ltr">SDK</span> سبک برای اتصال به درگاه پرداخت اینترنتی سپ در پروژه‌های <span dir="ltr">
+Spring Boot 3.5.7</span> است. هدف آن ساده‌سازی دریافت توکن، اعتبارسنجی زودهنگام (<span dir="ltr">fail-fast</span>) و
+دریافت پاسخ‌های تایپ‌شده است.
 
 این پروژه یک کتابخانه است و برنامه اجرایی ندارد؛ آن را در پروژه خود استفاده می‌کنید تا روی منطق کسب‌وکار تمرکز کنید.
 
@@ -36,10 +38,11 @@ mvn clean install
 <div dir="ltr" align="left">
 
 ```xml
+
 <dependency>
-  <groupId>com.ernoxin</groupId>
-  <artifactId>sep-java-sdk</artifactId>
-  <version>1.0.3</version>
+    <groupId>com.ernoxin</groupId>
+    <artifactId>sep-java-sdk</artifactId>
+    <version>1.1.0</version>
 </dependency>
 ```
 
@@ -49,12 +52,14 @@ mvn clean install
 
 ## پیکربندی
 
-پیکربندی به‌صورت <span dir="ltr">fail-fast</span> انجام می‌شود: اگر مقدارهای اجباری ناقص باشند، برنامه در زمان بالا آمدن متوقف می‌شود تا خطا به مرحله پرداخت نرسد.
+پیکربندی به‌صورت <span dir="ltr">fail-fast</span> انجام می‌شود: اگر مقدارهای اجباری ناقص باشند، برنامه در زمان بالا آمدن
+متوقف می‌شود تا خطا به مرحله پرداخت نرسد.
 
 ### کلیدهای <span dir="ltr">application.properties</span>
 
 | کلید                                                 | الزامی | پیش‌فرض                                          | توضیح                                                                                           |
-| ---------------------------------------------------- | -----: | ------------------------------------------------ | ----------------------------------------------------------------------------------------------- |
+|------------------------------------------------------|-------:|--------------------------------------------------|-------------------------------------------------------------------------------------------------|
+| <span dir="ltr">`sep.enabled`</span>                 |    بله | <span dir="ltr">`false`</span>                   | برای ساخت beanهای Spring باید <span dir="ltr">`true`</span> باشد                                |
 | <span dir="ltr">`sep.terminal-id`</span>             |    بله | -                                                | شماره ترمینال پذیرنده (فقط عدد)                                                                 |
 | <span dir="ltr">`sep.callback-url`</span>            |    بله | -                                                | آدرس بازگشت پس از پرداخت، باید <span dir="ltr">http</span> یا <span dir="ltr">https</span> باشد |
 | <span dir="ltr">`sep.base-url`</span>                |    خیر | <span dir="ltr">`https://sep.shaparak.ir`</span> | دامنه سرویس (در صورت دریافت آدرس تست از سپ تنظیم کنید)                                          |
@@ -74,11 +79,15 @@ mvn clean install
 
 * <span dir="ltr">`sep.timeout.connect`</span> زمان برقراری اتصال است و شامل <span dir="ltr">TCP/SSL</span> می‌شود.
 * <span dir="ltr">`sep.timeout.read`</span> زمان انتظار برای دریافت پاسخ پس از اتصال است.
-* <span dir="ltr">retry</span> فقط روی خطاهای شبکه/ارتباطی فعال می‌شود و روی خطاهای منطقی درگاه یا کدهای پاسخ اجرا نمی‌شود.
-* <span dir="ltr">`max-attempts`</span> تعداد کل تلاش‌ها و <span dir="ltr">`backoff`</span> فاصله بین تلاش‌ها را مشخص می‌کند.
-* **هشدار:** فعال کردن <span dir="ltr">retry</span> برای دریافت توکن ممکن است باعث ایجاد چند توکن شود اگر درخواست اول در درگاه ثبت شده ولی پاسخ آن به شما نرسیده باشد.
+* <span dir="ltr">retry</span> فقط روی خطاهای شبکه/ارتباطی فعال می‌شود و روی خطاهای منطقی درگاه یا کدهای پاسخ اجرا
+  نمی‌شود.
+* <span dir="ltr">`max-attempts`</span> تعداد کل تلاش‌ها و <span dir="ltr">`backoff`</span> فاصله بین تلاش‌ها را مشخص
+  می‌کند.
+* **هشدار:** فعال کردن <span dir="ltr">retry</span> برای دریافت توکن ممکن است باعث ایجاد چند توکن شود اگر درخواست اول در
+  درگاه ثبت شده ولی پاسخ آن به شما نرسیده باشد.
 
-فرمت مدت‌زمان‌ها می‌تواند به صورت <span dir="ltr">`500ms`</span>، <span dir="ltr">`2s`</span> یا <span dir="ltr">`1m`</span> باشد.
+فرمت مدت‌زمان‌ها می‌تواند به صورت <span dir="ltr">`500ms`</span>، <span dir="ltr">`2s`</span> یا <span dir="ltr">
+`1m`</span> باشد.
 
 ### نمونه تنظیمات
 
@@ -87,6 +96,7 @@ mvn clean install
 <div dir="ltr" align="left">
 
 ```properties
+sep.enabled=true
 sep.terminal-id=0000
 sep.callback-url=https://example.com/payment/callback
 ```
@@ -126,7 +136,8 @@ public class PaymentService {
 
 ### گام ۲: دریافت توکن
 
-حداقل ورودی لازم شامل مبلغ و <span dir="ltr">ResNum</span> است. اگر <span dir="ltr">`sep.callback-url`</span> در تنظیمات تعریف شده باشد، ارسال آن در هر درخواست ضروری نیست.
+حداقل ورودی لازم شامل مبلغ و <span dir="ltr">ResNum</span> است. اگر <span dir="ltr">`sep.callback-url`</span> در تنظیمات
+تعریف شده باشد، ارسال آن در هر درخواست ضروری نیست.
 
 <div dir="ltr" align="left">
 
@@ -150,13 +161,16 @@ String redirectUrl = client.buildRedirectUrl(result.token());
 
 </div>
 
-در صورت نیاز به هدایت با <span dir="ltr">POST</span> می‌توانید از آدرس <span dir="ltr">/OnlinePG/SendToken</span> استفاده کنید و توکن را در فرم ارسال نمایید.
+در صورت نیاز به هدایت با <span dir="ltr">POST</span> می‌توانید از آدرس <span dir="ltr">/OnlinePG/SendToken</span>
+استفاده کنید و توکن را در فرم ارسال نمایید.
 
 ### گام ۴: بازگشت و وریفای تراکنش
 
 فقط وقتی وضعیت تراکنش <span dir="ltr">OK</span> است باید وریفای انجام شود.
 
-**نکتهٔ امنیتی مهم:** برای جلوگیری از <span dir="ltr">Spending Double</span> مقدار <span dir="ltr">RefNum</span> را در پایگاه‌داده ذخیره کنید و روی آن محدودیت یکتا (<span dir="ltr">unique constraint</span>) بگذارید؛ اگر <span dir="ltr">RefNum</span> قبلاً ثبت شده بود، پیش از وریفای پردازش را متوقف کنید و نتیجه را «تأیید شده/تکراری» اعلام نمایید.
+**نکتهٔ امنیتی مهم:** برای جلوگیری از <span dir="ltr">Spending Double</span> مقدار <span dir="ltr">RefNum</span> را در
+پایگاه‌داده ذخیره کنید و روی آن محدودیت یکتا (<span dir="ltr">unique constraint</span>) بگذارید؛ اگر <span dir="ltr">
+RefNum</span> قبلاً ثبت شده بود، پیش از وریفای پردازش را متوقف کنید و نتیجه را «تأیید شده/تکراری» اعلام نمایید.
 
 <div dir="ltr" align="left">
 
@@ -170,9 +184,9 @@ public VerifyResult handleCallback(SepClient client, Map<String, String> params)
     Order order = orderService.findByResNum(callback.resNum());
     VerifyResult result = client.verifyTransaction(new VerifyRequest(callback.refNum()));
 
-    long verifiedAmount = result.transactionDetail().originalAmount();
+    Long verifiedAmount = result.transactionDetail().originalAmount();
     // For discount terminals, compare AffectiveAmount instead of OriginalAmount
-    if (verifiedAmount != order.amount()) {
+    if (verifiedAmount == null || verifiedAmount != order.amount()) {
         client.reverseTransaction(new ReverseRequest(callback.refNum()));
         throw new IllegalStateException("مبلغ وریفای با مبلغ سفارش برابر نیست");
     }
@@ -180,33 +194,38 @@ public VerifyResult handleCallback(SepClient client, Map<String, String> params)
 }
 ```
 
+**امنیت:** <span dir="ltr">parseCallback</span> فقط پارامترها را می‌خواند و اصالت پرداخت را ثابت نمی‌کند. برای وضعیت OK
+حتماً verify کنید و مبلغ/<span dir="ltr">resNum</span> را با دیتابیس سفارش خودتان تطبیق دهید.
+
 </div>
 
 ---
 
 ## مدل‌ها و اعتبارسنجی
 
-همه متدها <span dir="ltr">terminalId</span> را از تنظیمات می‌خوانند و در ورودی‌ها دریافت نمی‌کنند. در صورت نامعتبر بودن داده‌ها، خطای <span dir="ltr">SepValidationException</span> قبل از ارسال درخواست رخ می‌دهد.
+همه متدها <span dir="ltr">terminalId</span> را از تنظیمات می‌خوانند و در ورودی‌ها دریافت نمی‌کنند. در صورت نامعتبر بودن
+داده‌ها، خطای <span dir="ltr">SepValidationException</span> قبل از ارسال درخواست رخ می‌دهد.
 
 ### <span dir="ltr">TokenRequest</span>
+
 | فیلد (SDK)                                  | نوع                                             |           الزامی | توضیح                                                                                                                     |
-| ------------------------------------------- | ----------------------------------------------- | ---------------: | ------------------------------------------------------------------------------------------------------------------------- |
+|---------------------------------------------|-------------------------------------------------|-----------------:|---------------------------------------------------------------------------------------------------------------------------|
 | <span dir="ltr">`amount`</span>             | <span dir="ltr">long</span>                     |              بله | مبلغ تراکنش؛ باید مثبت باشد.                                                                                              |
 | <span dir="ltr">`resNum`</span>             | <span dir="ltr">String</span>                   |              بله | شناسه یکتا برای هر تراکنش؛ حداکثر ۵۰ کاراکتر.                                                                             |
 | <span dir="ltr">`redirectUrl`</span>        | <span dir="ltr">URI</span>                      | خیر (در درخواست) | اگر مقدار ندهید از <span dir="ltr">`sep.callback-url`</span> استفاده می‌شود؛ باید <span dir="ltr">http/https</span> باشد. |
 | <span dir="ltr">`cellNumber`</span>         | <span dir="ltr">String</span>                   |              خیر | شماره موبایل خریدار برای بازیابی کارت‌های ذخیره‌شده.                                                                      |
 | <span dir="ltr">`wage`</span>               | <span dir="ltr">Long</span>                     |              خیر | کارمزد تراکنش (در پرداخت‌های تسهیمی).                                                                                     |
-| <span dir="ltr">`tokenExpiryInMin`</span>   | <span dir="ltr">Integer</span>                  |              خیر | اعتبار توکن به دقیقه (بین ۲۰ تا ۳۶۰۰؛ مقادیر خارج از بازه به کمینه/بیشینه تبدیل می‌شود).                                  |
+| <span dir="ltr">`tokenExpiryInMin`</span>   | <span dir="ltr">Integer</span>                  |              خیر | اعتبار توکن به دقیقه (بین ۲۰ تا ۳۶۰۰؛ خارج از بازه خطای اعتبارسنجی می‌دهد).                                               |
 | <span dir="ltr">`hashedCardNumbers`</span>  | <span dir="ltr">List<String></span>             |              خیر | لیست کارت‌های هش‌شده (حداکثر ۱۰ مورد). مقادیر با <span dir="ltr">`\|`</span> ارسال می‌شوند.                               |
 | <span dir="ltr">`getMethod`</span>          | <span dir="ltr">Boolean</span>                  |              خیر | در صورت <span dir="ltr">true</span> بازگشت از درگاه با <span dir="ltr">GET</span> انجام می‌شود.                           |
 | <span dir="ltr">`resNum1..4`</span>         | <span dir="ltr">String</span>                   |              خیر | اطلاعات اضافی برای گزارش‌گیری (هرکدام حداکثر ۵۰ کاراکتر).                                                                 |
 | <span dir="ltr">`tranType`</span>           | <span dir="ltr">SepTranType</span>              |              خیر | برای تراکنش دولتی با شناسه مقدار <span dir="ltr">`GOVERNMENT`</span> ارسال شود.                                           |
 | <span dir="ltr">`settlementIbanInfo`</span> | <span dir="ltr">List<SettlementIbanInfo></span> |              خیر | تسویه به چند حساب؛ حداکثر ۹ آیتم.                                                                                         |
- 
+
 ### <span dir="ltr">SettlementIbanInfo</span>
 
 | فیلد (SDK)                          | نوع                           | الزامی | توضیح                                                                                      |
-| ----------------------------------- | ----------------------------- | -----: | ------------------------------------------------------------------------------------------ |
+|-------------------------------------|-------------------------------|-------:|--------------------------------------------------------------------------------------------|
 | <span dir="ltr">`iban`</span>       | <span dir="ltr">String</span> |    بله | شماره شبا ۲۶ کاراکتری که با <span dir="ltr">IR</span> شروع می‌شود.                         |
 | <span dir="ltr">`amount`</span>     | <span dir="ltr">long</span>   |    بله | مبلغ تسهیم؛ باید مثبت باشد.                                                                |
 | <span dir="ltr">`purchaseId`</span> | <span dir="ltr">String</span> |    بله | شناسه تسهیم. در ترکیب تسویه دولتی و عادی، برای موارد عادی مقدار ۳۰ کاراکتر صفر ارسال کنید. |
@@ -284,7 +303,7 @@ TokenResult result = client.requestToken(request);
 ## تمام متدهای کلاینت
 
 | متد                                         | ورودی                                                              | خروجی                                | نکته مهم                                                                   |
-| ------------------------------------------- | ------------------------------------------------------------------ | ------------------------------------ | -------------------------------------------------------------------------- |
+|---------------------------------------------|--------------------------------------------------------------------|--------------------------------------|----------------------------------------------------------------------------|
 | <span dir="ltr">`requestToken`</span>       | <span dir="ltr">TokenRequest</span>                                | <span dir="ltr">TokenResult</span>   | ایجاد توکن پرداخت                                                          |
 | <span dir="ltr">`buildRedirectUrl`</span>   | <span dir="ltr">token</span>                                       | <span dir="ltr">String</span>        | آدرس نهایی بر اساس <span dir="ltr">/OnlinePG/SendToken</span> ساخته می‌شود |
 | <span dir="ltr">`parseCallback`</span>      | <span dir="ltr">Map</span> یا <span dir="ltr">MultiValueMap</span> | <span dir="ltr">SepCallback</span>   | خروجی شامل وضعیت و پارامترهای کلیدی بازگشت است                             |
@@ -298,7 +317,7 @@ TokenResult result = client.requestToken(request);
 ### توکن و وضعیت تراکنش
 
 | کد | توضیح                            |
-| -: | -------------------------------- |
+|---:|----------------------------------|
 |  1 | انصراف کاربر                     |
 |  2 | پرداخت موفق                      |
 |  3 | پرداخت ناموفق                    |
@@ -313,7 +332,7 @@ TokenResult result = client.requestToken(request);
 ### کدهای سرویس‌های <span dir="ltr">Verify</span> و <span dir="ltr">Reverse</span>
 
 |   کد | توضیح                                    |
-| ---: | ---------------------------------------- |
+|-----:|------------------------------------------|
 |    0 | موفق                                     |
 |    2 | درخواست تکراری                           |
 |   -2 | تراکنش یافت نشد                          |
@@ -336,9 +355,12 @@ TokenResult result = client.requestToken(request);
 
 ## پرسش‌های پرتکرار
 
-* چرا دریافت توکن خطای اعتبارسنجی می‌دهد؟ بررسی کنید <span dir="ltr">terminal-id</span> و <span dir="ltr">callback-url</span> مقدار دارند و <span dir="ltr">ResNum</span> خالی نیست.
-* چرا وریفای خطای <span dir="ltr">-2</span> می‌دهد؟ مقدار <span dir="ltr">RefNum</span> نامعتبر است یا تراکنش یافت نشده است.
+* چرا دریافت توکن خطای اعتبارسنجی می‌دهد؟ بررسی کنید <span dir="ltr">terminal-id</span> و <span dir="ltr">
+  callback-url</span> مقدار دارند و <span dir="ltr">ResNum</span> خالی نیست.
+* چرا وریفای خطای <span dir="ltr">-2</span> می‌دهد؟ مقدار <span dir="ltr">RefNum</span> نامعتبر است یا تراکنش یافت نشده
+  است.
 * چرا ریورس خطای <span dir="ltr">-106</span> می‌دهد؟ آی‌پی سرور در پنل ثبت نشده است.
-* چرا پرداخت موفق بوده اما باز هم خطا دریافت می‌کنم؟ ابتدا نتیجه <span dir="ltr">verify</span> را بررسی کنید و مقدار مبلغ را با فاکتور تطبیق دهید.
+* چرا پرداخت موفق بوده اما باز هم خطا دریافت می‌کنم؟ ابتدا نتیجه <span dir="ltr">verify</span> را بررسی کنید و مقدار
+  مبلغ را با فاکتور تطبیق دهید.
 
 </div>

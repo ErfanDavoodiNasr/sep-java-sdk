@@ -4,6 +4,7 @@ import com.ernoxin.sepjavasdk.client.SepClient;
 import com.ernoxin.sepjavasdk.http.SepHttpClient;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 
@@ -12,8 +13,11 @@ import org.springframework.context.annotation.Bean;
  *
  * <p>Registers {@link SepConfig}, {@link SepHttpClient}, and {@link SepClient} when no custom
  * beans of the same types are provided by the application.
+ *
+ * <p>Opt-in: set {@code sep.enabled=true}. Without that flag, no beans are registered.
  */
 @AutoConfiguration
+@ConditionalOnProperty(prefix = "sep", name = "enabled", havingValue = "true")
 @EnableConfigurationProperties(SepProperties.class)
 public class SepAutoConfiguration {
     /**
@@ -43,7 +47,7 @@ public class SepAutoConfiguration {
     /**
      * Creates primary SEP client bean.
      *
-     * @param config SDK configuration
+     * @param config     SDK configuration
      * @param httpClient HTTP client implementation
      * @return fully configured SEP client
      */
