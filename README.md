@@ -220,7 +220,7 @@ public VerifyResult handleCallback(SepClient client, Map<String, String> params)
 | <span dir="ltr">`getMethod`</span>          | <span dir="ltr">Boolean</span>                  |              خیر | در صورت <span dir="ltr">true</span> بازگشت از درگاه با <span dir="ltr">GET</span> انجام می‌شود.                           |
 | <span dir="ltr">`resNum1..4`</span>         | <span dir="ltr">String</span>                   |              خیر | اطلاعات اضافی برای گزارش‌گیری (هرکدام حداکثر ۵۰ کاراکتر).                                                                 |
 | <span dir="ltr">`tranType`</span>           | <span dir="ltr">SepTranType</span>              |              خیر | برای تراکنش دولتی با شناسه مقدار <span dir="ltr">`GOVERNMENT`</span> ارسال شود.                                           |
-| <span dir="ltr">`settlementIbanInfo`</span> | <span dir="ltr">List<SettlementIbanInfo></span> |              خیر | تسویه به چند حساب؛ حداکثر ۹ آیتم.                                                                                         |
+| <span dir="ltr">`settlementIbanInfo`</span> | <span dir="ltr">List<SettlementIbanInfo></span> |              خیر | تسویه به چند حساب؛ حداکثر ۹ آیتم. جمع <span dir="ltr">`amount`</span>های این لیست باید دقیقاً برابر مبلغ توکن باشد.       |
 
 ### <span dir="ltr">SettlementIbanInfo</span>
 
@@ -254,7 +254,7 @@ TokenResult result = client.requestToken(request);
 
 ```java
 List<SettlementIbanInfo> settlements = List.of(
-        new SettlementIbanInfo("IR111111111111111111111111", 7000, "12345678901234567890123456789"),
+        new SettlementIbanInfo("IR111111111111111111111111", 8000, "12345678901234567890123456789"),
         new SettlementIbanInfo("IR222222222222222222222222", 4000, "12345678901234567890123456789")
 );
 

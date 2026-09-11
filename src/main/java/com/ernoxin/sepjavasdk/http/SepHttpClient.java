@@ -90,15 +90,15 @@ public final class SepHttpClient {
     /**
      * Sends a JSON POST request to SEP and parses a typed response.
      *
-     * @param path SEP endpoint path appended to configured base URL
-     * @param request request payload object
-     * @param dataType expected response data type
+     * @param path         SEP endpoint path appended to configured base URL
+     * @param request      request payload object
+     * @param dataType     expected response data type
      * @param responseType response validation strategy
      * @param successCodes logical gateway success codes for selected response type
-     * @param <T> result type
+     * @param <T>          result type
      * @return parsed successful response payload
      * @throws SepValidationException when request serialization fails
-     * @throws SepTransportException when transport fails after retries
+     * @throws SepTransportException  when transport fails after retries
      */
 
     private static void configureRestTemplate(RestTemplate restTemplate, SepConfig config) {

@@ -9,7 +9,6 @@ import com.ernoxin.sepjavasdk.exception.SepTransportException;
 import com.ernoxin.sepjavasdk.exception.SepValidationException;
 import com.ernoxin.sepjavasdk.http.SepHttpClient;
 import com.ernoxin.sepjavasdk.http.SepResponseType;
-import com.ernoxin.sepjavasdk.model.*;
 import com.ernoxin.sepjavasdk.support.SepEndpoints;
 import com.ernoxin.sepjavasdk.support.SepValidation;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -291,7 +290,7 @@ public final class SepClient {
         validateOptionalResNum(request.resNum3(), "resNum3");
         validateOptionalResNum(request.resNum4(), "resNum4");
         validateHashedCardNumbers(request.hashedCardNumbers());
-        validateSettlementInfo(request.settlementIbanInfo(), request.tranType());
+        validateSettlementInfo(request.settlementIbanInfo(), request.tranType(), request.amount());
     }
 
     private void validateOptionalResNum(String value, String field) {
@@ -319,7 +318,7 @@ public final class SepClient {
         }
     }
 
-    private void validateSettlementInfo(List<SettlementIbanInfo> settlementIbanInfo, SepTranType tranType) {
+    private void validateSettlementInfo(List<SettlementIbanInfo> settlementIbanInfo, SepTranType tranType, long amount) {
         if (settlementIbanInfo == null) {
             if (tranType == SepTranType.GOVERNMENT) {
                 throw new SepValidationException("settlementIbanInfo is required for Government transactions");
@@ -332,6 +331,7 @@ public final class SepClient {
         if (settlementIbanInfo.size() > config.maxSettlementItems()) {
             throw new SepValidationException("settlementIbanInfo size must be at most " + config.maxSettlementItems());
         }
+        long settlementSum = 0L;
         for (SettlementIbanInfo info : settlementIbanInfo) {
             if (info == null) {
                 throw new SepValidationException("settlementIbanInfo contains null");
@@ -339,6 +339,10 @@ public final class SepClient {
             SepValidation.requireIban(info.iban());
             SepValidation.requirePositive(info.amount(), "settlementIbanInfo.amount");
             SepValidation.requireNonBlank(info.purchaseId(), "settlementIbanInfo.purchaseId");
+            settlementSum = Math.addExact(settlementSum, info.amount());
+        }
+        if (settlementSum != amount) {
+            throw new SepValidationException("settlementIbanInfo amounts must sum to token amount");
         }
     }
 
